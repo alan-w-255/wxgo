@@ -9,4 +9,7 @@ import (
 func init() {
 	beego.Router("/", &controllers.MainController{})
 	beego.Router("/wx", &controllers.WXController{})
+
+	// todo: 开发绑定用户功能
+	beego.Router("/wx/usrbind", &controllers.BindUsrController{})
 }

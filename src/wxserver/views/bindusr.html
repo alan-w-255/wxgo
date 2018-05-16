@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link rel="stylesheet" href="https://res.wx.qq.com/open/libs/weui/1.1.2/weui.min.css">
+  <title>{{.website}}</title>
+</head>
+
+<body>
+  <div class="container">
+    <!-- 用户输入表单 -->
+    <div id="usrinputform">
+      <div class="weui-cells__title">用户绑定</div>
+      <div class="weui-cells">
+
+        <form id="usr_bind_form" action="/wx/bindusr" method="post">
+          <!-- 用户输入姓名 -->
+          <div class="weui-cell">
+            <div class="weui-cell__hd">
+              <label class="weui-label">姓名</label>
+            </div>
+            <div class="weui-cell__bd">
+              <span style="color: red; font-size: 1rem;"></span>
+              <input id="user_name" name="user_name" type="text" class="weui-input" placeholder="请输入姓名">
+            </div>
+          </div>
+
+          <!-- 用户输入身份证号 -->
+          <div class="weui-cell">
+            <div class="weui-cell__hd">
+              <label class="weui-label">身份证号</label>
+            </div>
+            <div class="weui-cell__bd">
+              <span style="color: red; font-size: 1rem;"></span>
+              <input id="id_card_number" type="text" name="id_card_number" class="weui-input" placeholder="请输入身份证号">
+            </div>
+          </div>
+
+          <!-- 用户输入手机号 -->
+          <div class="weui-cell weui-cell_vcode">
+            <div class="weui-cell__hd">
+              <label class="weui-label">手机号</label>
+            </div>
+            <div class="weui-cell__bd">
+              <span style="color: red; font-size: 1rem;"></span>
+              <input id="tel_number" name="tel_number" class="weui-input" type="tel" pattern="[0-9]*" placeholder="请输入手机号">
+            </div>
+            <div class="weui-cell__ft">
+              <button class="weui-vcode-btn">获取验证码</button>
+            </div>
+          </div>
+
+          <!-- 输入验证码 -->
+          <div class="weui-cell weui-cell_vcode">
+            <div class="weui-cell__hd">
+              <label class="weui-label">验证码</label>
+            </div>
+            <div class="weui-cell__bd">
+              <span style="color: red; font-size: 1rem;"></span>
+              <input id="verification_code" name="verification_code" class="weui-input" type="tel" pattern="[0-9]*" placeholder="请输入验证码">
+            </div>
+          </div>
+
+          <!-- 确认btn -->
+          <div class="" style="margin-top: 1rem">
+            <a id="submitbtn" href="javascript:;" class="weui-btn weui-btn_primary" type="submint">确认提交</a>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- 绑定成功消息 -->
+    <div id="bindsuccessmsg" class="weui-msg" style="display: none;">
+      <div class="weui-msg__icon-area">
+        <i class="weui-icon-success weui-icon_msg"></i>
+      </div>
+      <div class="weui-msg__text-area">
+        <h2 class="weui-msg__title">绑定成功</h2>
+        <p class="weui-msg__desc">现在你可以在微信上获取电子报告单了!</p>
+      </div>
+    </div>
+    <!-- 绑定失败消息 -->
+    <div id="binderrmsg" class="weui-msg" style="display: none;">
+      <div class="weui-msg__icon-area">
+        <i class="weui-icon-warn weui-icon_msg"></i>
+      </div>
+      <div class="weui-msg__text-area">
+        <h2 class="weui-msg__title">绑定失败</h2>
+        <p class="weui-msg__desc"><span id="binderrmsg"></span></p>
+      </div>
+    </div>
+
+    <!-- 加载中toast -->
+    <div id="loadingtoast">
+      <div id="loadingToast" style="opacity: 0; display: none;">
+        <div class="weui-mask_transparent"></div>
+        <div class="weui-toast">
+          <i class="weui-loading weui-icon_toast"></i>
+          <p class="weui-toast__content">数据加载中</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <script src="https://ajax.aspnetcdn.com/ajax/jQuery/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.17.0/jquery.validate.min.js"></script>
+  <script src="../static/js/errmsg.zh.js"></script>
+  <script>
+    $.validator.addMethod("check_id_card_number", (val, el, paras) => {
+      let reg = /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/;
+      return reg.test(val)
+    }, "*请输入正确的身份证号!")
+
+    $.validator.addMethod("check_phone_number", (val, el, paras) => {
+      let reg = /^1[0-9]{10}$/
+      return reg.test(val)
+    }, "请输入正确的手机号!")
+    $(() => {
+      $("#submitbtn").click(() => {
+        $("#usr_bind_form").submit()
+      })
+    })
+
+    $(() => {
+      console.log("hello world")
+      $("#usr_bind_form").validate({
+        debug: true,
+        rules: {
+          user_name: {
+            required: true,
+            minlength: 2
+          },
+          id_card_number: {
+            required: true,
+            check_id_card_number: true
+          },
+          tel_number: {
+            required: true,
+            check_phone_number: true
+          },
+          verification_code: {
+            required: true
+          }
+        },
+        messages: {
+          name: {
+            required: "*必填",
+            minlength: "*长度至少为2"
+          }
+        },
+        errorPlacement: (error, element) => {
+          console.log("error")
+          error.appendTo(element.siblings("span"));
+        },
+        submitHandler: (form) => {
+          console.log("submint")
+          let usrinfo = {}
+          usrinfo["user_name"] = $("#user_name").val()
+          usrinfo["tel_number"] = $("#tel_number").val()
+          usrinfo["verification_code"] = $("#verification_code").val()
+          usrinfo["id_card_number"] = $("#id_card_number").val()
+          $.ajax({
+            type: "POST",
+            datatype: "text",
+            url: '/wx/usrbind',
+            data: JSON.stringify(usrinfo),
+            contentType: "application/json",
+            success: (resp) => {
+
+              let result = JSON.parse(resp)
+              if(result["errcode"] == 0) {
+                $("#usrinputform").hide()
+                $("#bindsuccessmsg").show()
+              } else {
+                $("#usrinputform").hide()
+                $("#binderrmsg .errormsg").html(result["errmsg"])
+                $("#binderrmsg").show()
+              }
+            }
+          })
+        },
+        invalidHandler: function (event, validator) {
+          console.log("error")
+        }
+      })
+    })
+  </script>
+</body>
+
+</html>
+</body>
+
+</html>
